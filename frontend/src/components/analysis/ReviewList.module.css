@@ -1,0 +1,91 @@
+/* ReviewList.module.css */
+
+.container {
+  animation: fadeInUp var(--duration-slow) var(--ease-out);
+  animation-delay: 180ms;
+  animation-fill-mode: both;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.titleRow {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.count {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.filters {
+  display: flex;
+  gap: var(--space-1);
+  background: var(--bg-secondary);
+  padding: 3px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-primary);
+}
+
+.filterBtn {
+  padding: var(--space-1) var(--space-4);
+  font-family: var(--font-primary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  white-space: nowrap;
+}
+
+.filterBtn:hover {
+  color: var(--text-primary);
+}
+
+.filterBtnActive {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-xs);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+.emptyFilter {
+  text-align: center;
+  padding: var(--space-10);
+  color: var(--text-tertiary);
+  font-size: 0.9375rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+}
+
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

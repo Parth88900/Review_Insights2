@@ -1,0 +1,118 @@
+/* Dashboard.module.css */
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-8);
+  animation: fadeIn var(--duration-normal) var(--ease-out);
+}
+
+.productHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  margin-bottom: var(--space-8);
+  padding-bottom: var(--space-6);
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.productImage {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-primary);
+  flex-shrink: 0;
+}
+
+.productInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.productName {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-1);
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.productMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+}
+
+.productLink {
+  color: var(--color-accent);
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.productLink:hover {
+  text-decoration: underline;
+}
+
+.newAnalysisBtn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-full);
+  font-family: var(--font-primary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  flex-shrink: 0;
+}
+
+.newAnalysisBtn:hover {
+  background: var(--gray-200);
+  color: var(--text-primary);
+}
+
+/* Layout grid */
+.topRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+  margin-bottom: var(--space-5);
+}
+
+.fullWidth {
+  margin-bottom: var(--space-5);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: var(--space-5);
+  }
+  .topRow {
+    grid-template-columns: 1fr;
+  }
+  .productHeader {
+    flex-direction: column;
+    text-align: center;
+  }
+  .productName {
+    white-space: normal;
+  }
+  .productMeta {
+    justify-content: center;
+  }
+}
