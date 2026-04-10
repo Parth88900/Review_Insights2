@@ -9,7 +9,11 @@ export default function URLInput({ onSubmit, disabled }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (url.trim() && !disabled) {
-      onSubmit(url.trim());
+      let finalUrl = url.trim();
+      if (!finalUrl.startsWith('http')) {
+        finalUrl = 'https://' + finalUrl;
+      }
+      onSubmit(finalUrl);
     }
   };
 
@@ -39,7 +43,7 @@ export default function URLInput({ onSubmit, disabled }) {
         </div>
         <input
           id="url-input"
-          type="url"
+          type="text"
           className={styles.input}
           placeholder="Paste a product URL (Amazon, Flipkart, etc.)"
           value={url}

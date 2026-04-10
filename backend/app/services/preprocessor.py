@@ -4,7 +4,7 @@ import re
 import html
 import unicodedata
 import logging
-from typing import List
+from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +127,7 @@ def prepare_reviews_for_analysis(reviews_text: List[str]) -> str:
     return "\n\n".join(formatted)
 
 
-def extract_rating_from_text(text: str) -> float | None:
+def extract_rating_from_text(text: str) -> Optional[float]:
     """Attempt to extract a numeric rating from text."""
     patterns = [
         r'(\d+(?:\.\d+)?)\s*(?:out of|/)\s*5',

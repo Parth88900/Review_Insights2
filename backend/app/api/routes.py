@@ -59,41 +59,34 @@ async def analyze_reviews(request: AnalyzeRequest):
         )
     except ScrapingError as e:
         logger.error(f"Scraping failed: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        reviews, product_name, product_image = [], None, None
     except Exception as e:
         logger.error(f"Unexpected scraping error: {e}")
-        raise HTTPException(
-            status_code=500,
-            detail="An unexpected error occurred while scraping reviews. Please try again.",
-        )
+        reviews, product_name, product_image = [], None, None
 
     if not reviews:
         raise HTTPException(
             status_code=400,
-            detail="No reviews found on the provided page. Please check the URL and try again.",
+            detail="No reviews found on the provided page. Please ensure you provided a valid product link.",
         )
 
     logger.info(f"Scraped {len(reviews)} reviews for: {product_name or 'Unknown Product'}")
 
-    # Step 2 & 3: Analyze sentiment
+    # Step 2 & 3: Concurrently analyze sentiment and generate summary
+    import asyncio
     try:
-        reviews = await analyzer.analyze_sentiments(reviews)
-    except LLMError as e:
-        logger.warning(f"LLM analysis partially failed (using fallbacks): {e}")
+        # Run them in parallel instead of sequentially to halve the LLM wait time
+        sentiment_task = asyncio.create_task(analyzer.analyze_sentiments(reviews))
+        summary_task = asyncio.create_task(analyzer.generate_summary(reviews))
+        
+        reviews, (summary, themes) = await asyncio.gather(sentiment_task, summary_task)
     except Exception as e:
-        logger.error(f"Sentiment analysis error: {e}")
-        # Continue with whatever sentiment data we have
-
-    # Step 4: Generate summary and themes
-    try:
-        summary, themes = await analyzer.generate_summary(reviews)
-    except Exception as e:
-        logger.error(f"Summary generation failed: {e}")
-        # Create a minimal summary
+        logger.error(f"Analysis failed: {e}")
+        # Create a minimal summary using whatever we scraped
         from app.models.schemas import AnalysisSummary, SentimentLabel
 
-        pos = sum(1 for r in reviews if r.sentiment == SentimentLabel.POSITIVE)
-        neg = sum(1 for r in reviews if r.sentiment == SentimentLabel.NEGATIVE)
+        pos = sum(1 for r in reviews if (r.rating and r.rating >= 4))
+        neg = sum(1 for r in reviews if (r.rating and r.rating <= 2))
         scores = [r.sentiment_score for r in reviews if r.sentiment_score is not None]
         avg = sum(scores) / len(scores) if scores else 0
 
@@ -144,11 +137,13 @@ async def export_results(format: str):
         data = f.read()
 
     if format == "json":
-        return JSONResponse(content=__import__("json").loads(data))
+        headers = {"Content-Disposition": 'attachment; filename="review_analysis.json"'}
+        return JSONResponse(content=__import__("json").loads(data), headers=headers)
     elif format == "csv":
         from app.utils.export import to_csv
         response_data = AnalyzeResponse.model_validate_json(data)
         csv_content = to_csv(response_data.reviews)
-        return PlainTextResponse(content=csv_content, media_type="text/csv")
+        headers = {"Content-Disposition": 'attachment; filename="review_analysis.csv"'}
+        return PlainTextResponse(content=csv_content, media_type="text/csv", headers=headers)
     else:
         raise HTTPException(status_code=400, detail=f"Unsupported format: {format}. Use 'json' or 'csv'.")

@@ -10,7 +10,8 @@ class Settings(BaseSettings):
 
     # OpenAI
     openai_api_key: str = "your_openai_api_key_here"
-    openai_model: str = "gpt-3.5-turbo"
+    openai_model: str = "gemini-2.5-flash"
+    openai_base_url: str = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
     # Server
     host: str = "0.0.0.0"
@@ -18,15 +19,17 @@ class Settings(BaseSettings):
     debug: bool = True
 
     # CORS
-    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+    cors_origins: str = "*"
 
-    # Rate Limiting
     max_requests_per_minute: int = 30
-    scrape_delay_seconds: float = 1.5
+    scrape_delay_seconds: float = 0.0
 
     @property
     def cors_origin_list(self) -> List[str]:
-        return [origin.strip() for origin in self.cors_origins.split(",")]
+        origins = self.cors_origins.strip()
+        if origins == "*":
+            return ["*"]
+        return [origin.strip() for origin in origins.split(",")]
 
     class Config:
         env_file = ".env"

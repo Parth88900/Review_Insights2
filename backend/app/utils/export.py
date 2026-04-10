@@ -23,7 +23,7 @@ def to_dataframe(reviews: List[ReviewData]) -> pd.DataFrame:
             "rating": review.rating,
             "date": review.date,
             "title": review.title,
-            "text": review.text[:500],  # Truncate for readability
+            "text": review.text,
             "verified": review.verified,
             "helpful_count": review.helpful_count,
             "sentiment": review.sentiment.value if review.sentiment else None,
@@ -48,7 +48,9 @@ def to_csv(reviews: List[ReviewData]) -> str:
 
 def save_results(response: AnalyzeResponse, filepath: str = "data/results.json"):
     """Save analysis results to a JSON file."""
+    import os
     try:
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
         with open(filepath, "w", encoding="utf-8") as f:
             f.write(to_json(response))
         logger.info(f"Results saved to {filepath}")

@@ -24,7 +24,10 @@ from app.services.preprocessor import clean_text, prepare_reviews_for_analysis
 logger = logging.getLogger(__name__)
 
 # Initialize OpenAI client
-client = AsyncOpenAI(api_key=settings.openai_api_key)
+client = AsyncOpenAI(
+    api_key=settings.openai_api_key,
+    base_url=settings.openai_base_url
+)
 
 
 SENTIMENT_SYSTEM_PROMPT = """You are an expert product review analyst. Analyze the sentiment of each review and provide structured output.
@@ -72,8 +75,8 @@ class LLMAnalyzer:
         self.model = settings.openai_model
 
     @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=2, max=30),
+        stop=stop_after_attempt(5),
+        wait=wait_exponential(multiplier=2, min=4, max=60),
         retry=retry_if_exception_type((RateLimitError, APIConnectionError)),
         before_sleep=lambda retry_state: logger.warning(
             f"Retrying LLM call (attempt {retry_state.attempt_number})..."
@@ -124,7 +127,7 @@ class LLMAnalyzer:
         combined = "\n\n".join(review_texts)
 
         # Process in batches if there are many reviews
-        batch_size = 15
+        batch_size = 50
         for batch_start in range(0, len(reviews), batch_size):
             batch_end = min(batch_start + batch_size, len(reviews))
             batch_texts = review_texts[batch_start:batch_end]
@@ -169,9 +172,9 @@ class LLMAnalyzer:
         self, reviews: List[ReviewData]
     ) -> Tuple[AnalysisSummary, List[ThemeData]]:
         """Generate an executive summary and extract themes from reviews."""
-        # Compute basic stats
-        sentiments = [r.sentiment for r in reviews if r.sentiment]
-        scores = [r.sentiment_score for r in reviews if r.sentiment_score is not None]
+        # Compute basic stats (using fallbacks if sentiment is not yet populated sequentially)
+        sentiments = [r.sentiment or self._fallback_sentiment(r) for r in reviews]
+        scores = [r.sentiment_score if r.sentiment_score is not None else self._fallback_score(r) for r in reviews]
         ratings = [r.rating for r in reviews if r.rating is not None]
 
         positive_count = sum(1 for s in sentiments if s == SentimentLabel.POSITIVE)
@@ -194,9 +197,11 @@ class LLMAnalyzer:
         # Prepare context for LLM summary
         review_context = []
         for r in reviews:
+            r_sentiment = r.sentiment or self._fallback_sentiment(r)
+            r_score = r.sentiment_score if r.sentiment_score is not None else self._fallback_score(r)
             entry = f"Rating: {r.rating}/5" if r.rating else "No rating"
-            entry += f" | Sentiment: {r.sentiment.value if r.sentiment else 'unknown'}"
-            entry += f" | Score: {r.sentiment_score:.2f}" if r.sentiment_score is not None else ""
+            entry += f" | Sentiment: {r_sentiment.value}"
+            entry += f" | Score: {r_score:.2f}"
             if r.title:
                 entry += f"\nTitle: {r.title}"
             entry += f"\nReview: {clean_text(r.text)[:300]}"
