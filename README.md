@@ -105,3 +105,8 @@ review-insight/
 1. **Vanilla CSS over Tailwind**: Chosen to demonstrate high-level design capability and strict adherence to a custom Apple-inspired design system without relying on predefined utility classes.
 2. **BeautifulSoup over Playwright/Selenium**: To keep the scraping lightweight and fast, traditional HTTP requests + BS4 were used. For highly dynamic JS-rendered single-page apps, a headless browser might be needed in a future iteration.
 3. **Graceful Degradation**: If the LLM API fails or rate limits, the system seamlessly falls back to keyword-heuristic sentiment analysis to ensure the user still receives actionable data.
+## 🔗 Example Product Link
+
+You can test the application using the following sample product URL:
+
+👉 https://amzn.in/d/01uUU0gn
